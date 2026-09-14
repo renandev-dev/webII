@@ -1,0 +1,38 @@
+/**
+ * @fileoverview Rule to enforce the use of fallback fonts and a generic font last.
+ * @author Tanuj Kanti
+ */
+import type { CSSRuleDefinition } from "../types.js";
+export type FontFamilyFallbacksMessageIds = "useFallbackFonts" | "useGenericFont";
+export type FontFamilyFallbacksRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: [];
+    MessageIds: FontFamilyFallbacksMessageIds;
+}>;
+declare const _default: {
+    meta: {
+        type: "suggestion";
+        languages: string[];
+        docs: {
+            description: string;
+            dialects: string[];
+            recommended: boolean;
+            url: string;
+        };
+        messages: {
+            useFallbackFonts: string;
+            useGenericFont: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: [];
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: FontFamilyFallbacksMessageIds;
+    }>): {
+        "Rule > Block > Declaration"(node: any): void;
+        "Rule > Block > Declaration[property=/^font-family$/i] > Value"(node: any): void;
+        "Rule > Block > Declaration[property=/^font$/i] > Value"(node: any): void;
+    };
+};
+export default _default;

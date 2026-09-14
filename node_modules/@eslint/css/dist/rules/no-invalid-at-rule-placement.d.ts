@@ -1,0 +1,43 @@
+/**
+ * @fileoverview Rule to enforce correct placement of at-rules.
+ * @author thecalamiity
+ */
+import type { CSSRuleDefinition } from "../types.js";
+export type NoInvalidAtRulePlacementMessageIds = "invalidCharsetPlacement" | "invalidImportPlacement" | "invalidNamespacePlacement";
+export type NoInvalidAtRulePlacementRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: [];
+    MessageIds: NoInvalidAtRulePlacementMessageIds;
+}>;
+/**
+ * @import { CSSRuleDefinition } from "../types.js"
+ * @typedef {"invalidCharsetPlacement" | "invalidImportPlacement" | "invalidNamespacePlacement"} NoInvalidAtRulePlacementMessageIds
+ * @typedef {CSSRuleDefinition<{ RuleOptions: [], MessageIds: NoInvalidAtRulePlacementMessageIds }>} NoInvalidAtRulePlacementRuleDefinition
+ */
+declare const _default: {
+    meta: {
+        type: "problem";
+        languages: string[];
+        docs: {
+            description: string;
+            dialects: string[];
+            recommended: boolean;
+            url: string;
+        };
+        messages: {
+            invalidCharsetPlacement: string;
+            invalidImportPlacement: string;
+            invalidNamespacePlacement: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: [];
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: NoInvalidAtRulePlacementMessageIds;
+    }>): {
+        Atrule(node: import("@eslint/css-tree").AtrulePlain): void;
+        Rule(): void;
+    };
+};
+export default _default;

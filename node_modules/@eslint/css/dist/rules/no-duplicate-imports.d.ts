@@ -1,0 +1,39 @@
+/**
+ * @fileoverview Rule to prevent duplicate imports in CSS.
+ * @author Nicholas C. Zakas
+ */
+import type { CSSRuleDefinition } from "../types.js";
+export type NoDuplicateKeysMessageIds = "duplicateImport" | "removeDuplicateImportWithModifiers" | "removeDuplicateImportWithoutModifiers";
+export type NoDuplicateImportsRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: [];
+    MessageIds: NoDuplicateKeysMessageIds;
+}>;
+declare const _default: {
+    meta: {
+        type: "problem";
+        languages: string[];
+        fixable: "code";
+        hasSuggestions: true;
+        docs: {
+            description: string;
+            dialects: string[];
+            recommended: boolean;
+            url: string;
+        };
+        messages: {
+            duplicateImport: string;
+            removeDuplicateImportWithModifiers: string;
+            removeDuplicateImportWithoutModifiers: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: [];
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: NoDuplicateKeysMessageIds;
+    }>): {
+        "Atrule[name=/^import$/i]"(node: any): void;
+    };
+};
+export default _default;

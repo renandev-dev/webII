@@ -1,0 +1,43 @@
+/**
+ * @fileoverview Rule to prevent empty blocks in CSS.
+ * @author Nicholas C. Zakas
+ */
+import type { CSSRuleDefinition } from "../types.js";
+export type NoEmptyBlocksMessageIds = "emptyBlock" | "removeRule" | "convertToStatement";
+export type NoEmptyBlocksRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: [];
+    MessageIds: NoEmptyBlocksMessageIds;
+}>;
+/**
+ * @import { CSSRuleDefinition } from "../types.js"
+ * @typedef {"emptyBlock" | "removeRule" | "convertToStatement"} NoEmptyBlocksMessageIds
+ * @typedef {CSSRuleDefinition<{ RuleOptions: [], MessageIds: NoEmptyBlocksMessageIds }>} NoEmptyBlocksRuleDefinition
+ */
+declare const _default: {
+    meta: {
+        type: "problem";
+        languages: string[];
+        hasSuggestions: true;
+        docs: {
+            description: string;
+            dialects: string[];
+            recommended: boolean;
+            url: string;
+        };
+        messages: {
+            emptyBlock: string;
+            removeRule: string;
+            convertToStatement: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: [];
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: NoEmptyBlocksMessageIds;
+    }>): {
+        Block(node: import("@eslint/css-tree").BlockPlain): void;
+    };
+};
+export default _default;

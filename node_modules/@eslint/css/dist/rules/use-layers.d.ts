@@ -1,0 +1,78 @@
+/**
+ * @fileoverview Rule to require layers in CSS.
+ * @author Nicholas C. Zakas
+ */
+import type { CSSRuleDefinition } from "../types.js";
+export type UseLayersMessageIds = "missingLayer" | "missingLayerName" | "missingImportLayer" | "layerNameMismatch";
+export type UseLayersOptions = [
+    {
+        allowUnnamedLayers?: boolean;
+        requireImportLayers?: boolean;
+        layerNamePattern?: string;
+    }
+];
+export type UseLayersRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: UseLayersOptions;
+    MessageIds: UseLayersMessageIds;
+}>;
+/**
+ * @import { CSSRuleDefinition } from "../types.js"
+ * @typedef {"missingLayer" | "missingLayerName" | "missingImportLayer" | "layerNameMismatch"} UseLayersMessageIds
+ * @typedef {[{
+ *     allowUnnamedLayers?: boolean,
+ *     requireImportLayers?: boolean,
+ *     layerNamePattern?: string
+ * }]} UseLayersOptions
+ * @typedef {CSSRuleDefinition<{ RuleOptions: UseLayersOptions, MessageIds: UseLayersMessageIds }>} UseLayersRuleDefinition
+ */
+declare const _default: {
+    meta: {
+        type: "problem";
+        languages: string[];
+        docs: {
+            description: string;
+            dialects: string[];
+            url: string;
+        };
+        schema: {
+            type: "object";
+            properties: {
+                allowUnnamedLayers: {
+                    type: "boolean";
+                };
+                requireImportLayers: {
+                    type: "boolean";
+                };
+                layerNamePattern: {
+                    type: "string";
+                };
+            };
+            additionalProperties: false;
+        }[];
+        defaultOptions: [{
+            allowUnnamedLayers: false;
+            requireImportLayers: true;
+            layerNamePattern: string;
+        }];
+        messages: {
+            missingLayer: string;
+            missingLayerName: string;
+            missingImportLayer: string;
+            layerNameMismatch: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: UseLayersOptions;
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: UseLayersMessageIds;
+    }>): {
+        "Atrule[name=/^import$/i]"(node: any): void;
+        Layer(node: import("@eslint/css-tree").Layer): void;
+        "Atrule[name=/^layer$/i]"(node: any): void;
+        "Atrule[name=/^layer$/i]:exit"(): void;
+        Rule(node: import("@eslint/css-tree").RulePlain): void;
+    };
+};
+export default _default;

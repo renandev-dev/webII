@@ -1,0 +1,67 @@
+import type { CSSRuleDefinition } from "../types.js";
+export type PreferLogicalPropertiesMessageIds = "notLogicalProperty" | "notLogicalValue" | "notLogicalUnit" | "replaceWithLogicalProperty" | "replaceWithLogicalValue" | "replaceWithLogicalUnit";
+export type PreferLogicalPropertiesOptions = [
+    {
+        allowProperties?: string[];
+        allowUnits?: string[];
+    }
+];
+export type PreferLogicalPropertiesRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: PreferLogicalPropertiesOptions;
+    MessageIds: PreferLogicalPropertiesMessageIds;
+}>;
+declare const _default: {
+    meta: {
+        type: "problem";
+        languages: string[];
+        hasSuggestions: true;
+        docs: {
+            description: string;
+            dialects: string[];
+            url: string;
+        };
+        schema: {
+            type: "object";
+            properties: {
+                allowProperties: {
+                    type: "array";
+                    items: {
+                        enum: string[];
+                    };
+                    uniqueItems: true;
+                };
+                allowUnits: {
+                    type: "array";
+                    items: {
+                        enum: string[];
+                    };
+                    uniqueItems: true;
+                };
+            };
+            additionalProperties: false;
+        }[];
+        defaultOptions: [{
+            allowProperties: any[];
+            allowUnits: any[];
+        }];
+        messages: {
+            notLogicalProperty: string;
+            notLogicalValue: string;
+            notLogicalUnit: string;
+            replaceWithLogicalProperty: string;
+            replaceWithLogicalValue: string;
+            replaceWithLogicalUnit: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: PreferLogicalPropertiesOptions;
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: PreferLogicalPropertiesMessageIds;
+    }>): {
+        Declaration(node: import("@eslint/css-tree").DeclarationPlain): void;
+        Dimension(node: import("@eslint/css-tree").Dimension): void;
+    };
+};
+export default _default;

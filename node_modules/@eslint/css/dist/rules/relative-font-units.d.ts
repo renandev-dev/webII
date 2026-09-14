@@ -1,0 +1,55 @@
+/**
+ * @fileoverview Enforce the use of relative units for font size.
+ * @author Tanuj Kanti
+ */
+import type { CSSRuleDefinition } from "../types.js";
+import type { CssNodePlain } from "@eslint/css-tree";
+export type RelativeFontUnitsMessageIds = "allowedFontUnits";
+export type RelativeFontUnitsOptions = [{
+    allowUnits?: string[];
+}];
+export type RelativeFontUnitsRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: RelativeFontUnitsOptions;
+    MessageIds: RelativeFontUnitsMessageIds;
+}>;
+declare const _default: {
+    meta: {
+        type: "suggestion";
+        languages: string[];
+        docs: {
+            description: string;
+            dialects: string[];
+            recommended: boolean;
+            url: string;
+        };
+        schema: {
+            type: "object";
+            properties: {
+                allowUnits: {
+                    type: "array";
+                    items: {
+                        enum: string[];
+                    };
+                    uniqueItems: true;
+                };
+            };
+            additionalProperties: false;
+        }[];
+        defaultOptions: [{
+            allowUnits: string[];
+        }];
+        messages: {
+            allowedFontUnits: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: RelativeFontUnitsOptions;
+        Node: CssNodePlain;
+        MessageIds: "allowedFontUnits";
+    }>): {
+        Declaration(node: import("@eslint/css-tree").DeclarationPlain): void;
+    };
+};
+export default _default;

@@ -1,0 +1,44 @@
+/**
+ * @fileoverview Rule to prevent the use of unknown at-rules in CSS.
+ * @author Nicholas C. Zakas
+ */
+import type { AtrulePlain } from "@eslint/css-tree";
+import type { CSSRuleDefinition } from "../types.js";
+export type NoInvalidAtRulesMessageIds = "unknownAtRule" | "invalidPrelude" | "unknownDescriptor" | "invalidDescriptor" | "invalidExtraPrelude" | "missingPrelude" | "invalidCharsetSyntax";
+export type NoInvalidAtRulesRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: [];
+    MessageIds: NoInvalidAtRulesMessageIds;
+}>;
+declare const _default: {
+    meta: {
+        type: "problem";
+        languages: string[];
+        fixable: "code";
+        docs: {
+            description: string;
+            dialects: string[];
+            recommended: boolean;
+            url: string;
+        };
+        messages: {
+            unknownAtRule: string;
+            invalidPrelude: string;
+            unknownDescriptor: string;
+            invalidDescriptor: string;
+            invalidExtraPrelude: string;
+            missingPrelude: string;
+            invalidCharsetSyntax: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: [];
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: NoInvalidAtRulesMessageIds;
+    }>): {
+        Atrule(node: AtrulePlain): void;
+        "AtRule > Block > Declaration"(node: any): void;
+    };
+};
+export default _default;

@@ -1,0 +1,146 @@
+/**
+ * @fileoverview Rule to enforce the use of baseline features.
+ * @author Nicholas C. Zakas
+ */
+import type { CSSRuleDefinition } from "../types.js";
+export type UseBaselineMessageIds = "notBaselineProperty" | "notBaselinePropertyValue" | "notBaselineAtRule" | "notBaselineFunction" | "notBaselineMediaCondition" | "notBaselineSelector" | "notBaselineUnit";
+export type UseBaselineOptions = [
+    {
+        available?: "widely" | "newly" | number;
+        allowAtRules?: string[];
+        allowFunctions?: string[];
+        allowMediaConditions?: string[];
+        allowProperties?: string[];
+        allowPropertyValues?: {
+            [property: string]: string[];
+        };
+        allowSelectors?: string[];
+        allowUnits?: string[];
+    }
+];
+export type UseBaselineRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: UseBaselineOptions;
+    MessageIds: UseBaselineMessageIds;
+}>;
+declare const _default: {
+    meta: {
+        type: "problem";
+        languages: string[];
+        docs: {
+            description: string;
+            dialects: string[];
+            recommended: boolean;
+            url: string;
+        };
+        schema: {
+            type: "object";
+            properties: {
+                available: {
+                    anyOf: ({
+                        enum: string[];
+                        type?: undefined;
+                        minimum?: undefined;
+                        maximum?: undefined;
+                    } | {
+                        enum?: undefined;
+                        type: "integer";
+                        minimum: number;
+                        maximum: number;
+                    })[];
+                };
+                allowAtRules: {
+                    type: "array";
+                    items: {
+                        enum: string[];
+                    };
+                    uniqueItems: true;
+                };
+                allowFunctions: {
+                    type: "array";
+                    items: {
+                        enum: string[];
+                    };
+                    uniqueItems: true;
+                };
+                allowMediaConditions: {
+                    type: "array";
+                    items: {
+                        enum: string[];
+                    };
+                    uniqueItems: true;
+                };
+                allowProperties: {
+                    type: "array";
+                    items: {
+                        enum: string[];
+                    };
+                    uniqueItems: true;
+                };
+                allowPropertyValues: {
+                    type: "object";
+                    properties: {
+                        [k: string]: {
+                            type: "array";
+                            items: {
+                                enum: string[];
+                            };
+                            uniqueItems: true;
+                        };
+                    };
+                    additionalProperties: false;
+                };
+                allowSelectors: {
+                    type: "array";
+                    items: {
+                        enum: string[];
+                    };
+                    uniqueItems: true;
+                };
+                allowUnits: {
+                    type: "array";
+                    items: {
+                        enum: string[];
+                    };
+                    uniqueItems: true;
+                };
+            };
+            additionalProperties: false;
+        }[];
+        defaultOptions: [{
+            available: "widely";
+            allowAtRules: any[];
+            allowFunctions: any[];
+            allowMediaConditions: any[];
+            allowProperties: any[];
+            allowPropertyValues: {};
+            allowSelectors: any[];
+            allowUnits: any[];
+        }];
+        messages: {
+            notBaselineProperty: string;
+            notBaselinePropertyValue: string;
+            notBaselineAtRule: string;
+            notBaselineFunction: string;
+            notBaselineMediaCondition: string;
+            notBaselineSelector: string;
+            notBaselineUnit: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: UseBaselineOptions;
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: UseBaselineMessageIds;
+    }>): {
+        "Atrule[name=/^supports$/i]"(): void;
+        "Atrule[name=/^supports$/i] > AtrulePrelude > Condition"(node: any): void;
+        "Rule > Block > Declaration"(node: any): void;
+        "Atrule[name=/^supports$/i]:exit"(): void;
+        "Atrule[name=/^media$/i] > AtrulePrelude > MediaQueryList > MediaQuery > Condition"(node: any): void;
+        Atrule(node: import("@eslint/css-tree").AtrulePlain): void;
+        "PseudoClassSelector,PseudoElementSelector"(node: any): void;
+        NestingSelector(node: import("@eslint/css-tree").NestingSelector): void;
+    };
+};
+export default _default;

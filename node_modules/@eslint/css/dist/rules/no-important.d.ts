@@ -1,0 +1,38 @@
+/**
+ * @fileoverview Rule to disallow `!important` flags.
+ * @author thecalamiity
+ * @author Yann Bertrand
+ */
+import type { CSSRuleDefinition } from "../types.js";
+export type NoImportantMessageIds = "unexpectedImportant" | "removeImportant";
+export type NoImportantRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: [];
+    MessageIds: NoImportantMessageIds;
+}>;
+declare const _default: {
+    meta: {
+        type: "problem";
+        languages: string[];
+        hasSuggestions: true;
+        docs: {
+            description: string;
+            dialects: string[];
+            recommended: boolean;
+            url: string;
+        };
+        messages: {
+            unexpectedImportant: string;
+            removeImportant: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: [];
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: NoImportantMessageIds;
+    }>): {
+        Declaration(node: import("@eslint/css-tree").DeclarationPlain): void;
+    };
+};
+export default _default;

@@ -1,0 +1,37 @@
+/**
+ * @fileoverview Rule to disallow duplicate selectors within keyframe blocks.
+ * @author Nitin Kumar
+ */
+import type { CSSRuleDefinition } from "../types.js";
+export type DuplicateKeyframeSelectorMessageIds = "duplicateKeyframeSelector";
+export type DuplicateKeyframeSelectorRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: [];
+    MessageIds: DuplicateKeyframeSelectorMessageIds;
+}>;
+declare const _default: {
+    meta: {
+        type: "problem";
+        languages: string[];
+        docs: {
+            description: string;
+            dialects: string[];
+            recommended: boolean;
+            url: string;
+        };
+        messages: {
+            duplicateKeyframeSelector: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: [];
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: "duplicateKeyframeSelector";
+    }>): {
+        "Atrule[name=/^(-(o|moz|webkit)-)?keyframes$/i]"(): void;
+        "Atrule[name=/^(-(o|moz|webkit)-)?keyframes$/i]:exit"(): void;
+        Rule(node: import("@eslint/css-tree").RulePlain): void;
+    };
+};
+export default _default;

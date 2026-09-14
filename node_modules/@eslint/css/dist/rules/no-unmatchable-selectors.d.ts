@@ -1,0 +1,40 @@
+/**
+ * @fileoverview Rule to disallow unmatchable selectors.
+ * @author TKDev7
+ */
+import type { CSSRuleDefinition } from "../types.js";
+export type NoUnmatchableSelectorsMessageIds = "unmatchableSelector";
+export type NoUnmatchableSelectorsRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: [];
+    MessageIds: NoUnmatchableSelectorsMessageIds;
+}>;
+/**
+ * @import { CSSRuleDefinition } from "../types.js"
+ * @typedef {"unmatchableSelector"} NoUnmatchableSelectorsMessageIds
+ * @typedef {CSSRuleDefinition<{ RuleOptions: [], MessageIds: NoUnmatchableSelectorsMessageIds }>} NoUnmatchableSelectorsRuleDefinition
+ */
+declare const _default: {
+    meta: {
+        type: "problem";
+        languages: string[];
+        docs: {
+            description: string;
+            dialects: string[];
+            recommended: boolean;
+            url: string;
+        };
+        messages: {
+            unmatchableSelector: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: [];
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: "unmatchableSelector";
+    }>): {
+        AnPlusB(node: import("@eslint/css-tree").AnPlusB): void;
+    };
+};
+export default _default;

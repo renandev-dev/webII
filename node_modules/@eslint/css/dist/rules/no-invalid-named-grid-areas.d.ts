@@ -1,0 +1,37 @@
+/**
+ * @fileoverview Rule to prevent invalid named grid areas in CSS grid templates.
+ * @author xbinaryx
+ */
+import type { CSSRuleDefinition } from "../types.js";
+export type NoInvalidNamedGridAreasMessageIds = "emptyGridArea" | "unevenGridArea" | "nonRectangularGridArea";
+export type NoInvalidNamedGridAreasRuleDefinition = CSSRuleDefinition<{
+    RuleOptions: [];
+    MessageIds: NoInvalidNamedGridAreasMessageIds;
+}>;
+declare const _default: {
+    meta: {
+        type: "problem";
+        languages: string[];
+        docs: {
+            description: string;
+            dialects: string[];
+            recommended: boolean;
+            url: string;
+        };
+        messages: {
+            emptyGridArea: string;
+            unevenGridArea: string;
+            nonRectangularGridArea: string;
+        };
+    };
+    create(context: import("@eslint/core").RuleContext<{
+        LangOptions: import("../index.js").CSSLanguageOptions;
+        Code: import("../index.js").CSSSourceCode;
+        RuleOptions: [];
+        Node: import("@eslint/css-tree").CssNodePlain;
+        MessageIds: NoInvalidNamedGridAreasMessageIds;
+    }>): {
+        Declaration(node: import("@eslint/css-tree").DeclarationPlain): void;
+    };
+};
+export default _default;
