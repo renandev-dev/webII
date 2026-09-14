@@ -7,7 +7,7 @@ info:
 
 http:
   method: PATCH
-  url: "{{baseUrl}}/subjects/abc"
+  url: '{{baseUrl}}/subjects/abc'
   body:
     type: json
     data: |-

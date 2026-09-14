@@ -7,7 +7,7 @@ info:
 
 http:
   method: DELETE
-  url: "{{baseUrl}}/users/999999999"
+  url: '{{baseUrl}}/users/999999999'
 
 runtime:
   scripts:

@@ -7,7 +7,7 @@ info:
 
 http:
   method: PATCH
-  url: "{{baseUrl}}/questions/{{missingAuthorQuestionId}}"
+  url: '{{baseUrl}}/questions/{{missingAuthorQuestionId}}'
   body:
     type: json
     data: |-

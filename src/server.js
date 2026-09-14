@@ -1,14 +1,14 @@
-import "dotenv/config";
-import app from "./app.js";
-import prisma from "./config/database.js";
+import 'dotenv/config';
+import app from './app.js';
+import prisma from './config/database.js';
 
 const PORT = Number(process.env.PORT) || 3000;
 
 // Inicia o servidor HTTP e exibe no terminal os endereços úteis para desenvolvimento.
 const server = app.listen(PORT, () => {
-  console.log("Servidor rodando na porta " + PORT);
-  console.log("Health check: http://localhost:" + PORT + "/health");
-  console.log("Usuários: http://localhost:" + PORT + "/users");
+  console.log('Servidor rodando na porta ' + PORT);
+  console.log('Health check: http://localhost:' + PORT + '/health');
+  console.log('Usuários: http://localhost:' + PORT + '/users');
 });
 
 /**
@@ -17,7 +17,7 @@ const server = app.listen(PORT, () => {
  * @returns {Promise<void>} Finaliza o processo depois de liberar os recursos do banco.
  */
 async function shutdown(signal) {
-  console.log("Recebido " + signal + ". Encerrando...");
+  console.log('Recebido ' + signal + '. Encerrando...');
 
   server.close(async () => {
     await prisma.$disconnect();
@@ -25,5 +25,5 @@ async function shutdown(signal) {
   });
 }
 
-process.on("SIGINT", () => shutdown("SIGINT"));
-process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
