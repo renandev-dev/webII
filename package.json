@@ -1,7 +1,7 @@
 {
   "name": "gerador-provas-api",
   "version": "1.0.0",
-  "description": "API Gerador de Provas — template do curso Back-end 2026",
+  "description": "API para gerador de provas automáticas",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
@@ -14,39 +14,36 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/renandev-dev/webII.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/renandev-dev/webII/issues"
-  },
-  "homepage": "https://github.com/renandev-dev/webII#readme",
+  "keywords": [
+    "api",
+    "rest",
+    "education",
+    "provas"
+  ],
+  "author": "Seu Nome",
+  "license": "MIT",
   "dependencies": {
-    "@prisma/adapter-pg": "^7.10.0",
-    "@prisma/client": "^7.10.0",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "pg": "^8.23.0"
   },
   "devDependencies": {
-    "@eslint/css": "^2.0.0",
+    "@eslint/css": "^1.4.0",
     "@eslint/js": "^10.0.1",
-    "@eslint/json": "^2.1.0",
+    "@eslint/json": "^2.0.1",
     "@eslint/markdown": "^8.0.3",
     "@vitest/coverage-v8": "^5.0.0",
-    "eslint": "^10.10.0",
+    "eslint": "^10.9.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
-    "globals": "^17.12.0",
+    "globals": "^17.11.0",
     "nodemon": "^3.1.14",
     "prettier": "^3.9.6",
-    "prisma": "^7.10.0",
+    "prisma": "^7.9.1",
     "supertest": "^7.2.2",
-    "tsx": "^4.23.13",
+    "tsx": "^4.23.12",
     "vitest": "^5.0.0"
   }
 }

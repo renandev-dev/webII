@@ -2,7 +2,8 @@ import * as questionService from '../services/questionService.js';
 
 export const createQuestion = async (req, res) => {
   try {
-    const { enunciado, respostaCorreta, dificuldade, subjectId, authorId } = req.body;
+    const { enunciado, respostaCorreta, dificuldade, subjectId, authorId } =
+      req.body;
 
     if (!enunciado || dificuldade === undefined || !subjectId || !authorId) {
       return res.status(400).json({
@@ -19,7 +20,11 @@ export const createQuestion = async (req, res) => {
     }
 
     const parsedDificuldade = Number(dificuldade);
-    if (!Number.isInteger(parsedDificuldade) || parsedDificuldade < 1 || parsedDificuldade > 3) {
+    if (
+      !Number.isInteger(parsedDificuldade) ||
+      parsedDificuldade < 1 ||
+      parsedDificuldade > 3
+    ) {
       return res.status(400).json({
         success: false,
         message: 'A dificuldade deve ser um inteiro entre 1 e 3.',
@@ -29,8 +34,12 @@ export const createQuestion = async (req, res) => {
     const parsedSubjectId = Number(subjectId);
     const parsedAuthorId = Number(authorId);
 
-    if (!Number.isInteger(parsedSubjectId) || parsedSubjectId <= 0 ||
-        !Number.isInteger(parsedAuthorId) || parsedAuthorId <= 0) {
+    if (
+      !Number.isInteger(parsedSubjectId) ||
+      parsedSubjectId <= 0 ||
+      !Number.isInteger(parsedAuthorId) ||
+      parsedAuthorId <= 0
+    ) {
       return res.status(400).json({
         success: false,
         message: 'subjectId e authorId devem ser inteiros positivos.',
@@ -48,9 +57,13 @@ export const createQuestion = async (req, res) => {
     return res.status(201).json({ success: true, data: question });
   } catch (error) {
     if (error.statusCode) {
-      return res.status(error.statusCode).json({ success: false, message: error.message });
+      return res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
     }
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+    return res
+      .status(500)
+      .json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
@@ -62,8 +75,10 @@ export const getQuestions = async (req, res) => {
       data: questions,
       total: questions.length,
     });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+  } catch {
+    return res
+      .status(500)
+      .json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
@@ -82,12 +97,16 @@ export const getQuestionById = async (req, res) => {
     const question = await questionService.getQuestionByIdService(parsedId);
 
     if (!question) {
-      return res.status(404).json({ success: false, message: 'Questão não encontrada.' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Questão não encontrada.' });
     }
 
     return res.status(200).json({ success: true, data: question });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+  } catch {
+    return res
+      .status(500)
+      .json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
@@ -103,9 +122,15 @@ export const updateQuestion = async (req, res) => {
       });
     }
 
-    const { enunciado, respostaCorreta, dificuldade, ativa, subjectId, authorId } = req.body;
+    const {
+      enunciado,
+      respostaCorreta,
+      dificuldade,
+      ativa,
+      subjectId,
+      authorId,
+    } = req.body;
 
-    // Regra: pelo menos um campo permitido no PATCH
     if (
       enunciado === undefined &&
       respostaCorreta === undefined &&
@@ -120,7 +145,10 @@ export const updateQuestion = async (req, res) => {
       });
     }
 
-    if (enunciado !== undefined && (typeof enunciado !== 'string' || enunciado.trim() === '')) {
+    if (
+      enunciado !== undefined &&
+      (typeof enunciado !== 'string' || enunciado.trim() === '')
+    ) {
       return res.status(400).json({
         success: false,
         message: 'O enunciado, quando enviado, não pode ser vazio.',
@@ -141,7 +169,11 @@ export const updateQuestion = async (req, res) => {
     let parsedDificuldade;
     if (dificuldade !== undefined) {
       parsedDificuldade = Number(dificuldade);
-      if (!Number.isInteger(parsedDificuldade) || parsedDificuldade < 1 || parsedDificuldade > 3) {
+      if (
+        !Number.isInteger(parsedDificuldade) ||
+        parsedDificuldade < 1 ||
+        parsedDificuldade > 3
+      ) {
         return res.status(400).json({
           success: false,
           message: 'A dificuldade deve ser um inteiro entre 1 e 3.',
@@ -178,23 +210,32 @@ export const updateQuestion = async (req, res) => {
       }
     }
 
-    // Montagem dinâmica enviando apenas campos realmente definidos
     const updatePayload = {};
     if (enunciado !== undefined) updatePayload.enunciado = enunciado.trim();
-    if (respostaCorreta !== undefined) updatePayload.respostaCorreta = respostaCorreta;
-    if (parsedDificuldade !== undefined) updatePayload.dificuldade = parsedDificuldade;
+    if (respostaCorreta !== undefined)
+      updatePayload.respostaCorreta = respostaCorreta;
+    if (parsedDificuldade !== undefined)
+      updatePayload.dificuldade = parsedDificuldade;
     if (ativa !== undefined) updatePayload.ativa = ativa;
-    if (parsedSubjectId !== undefined) updatePayload.subjectId = parsedSubjectId;
+    if (parsedSubjectId !== undefined)
+      updatePayload.subjectId = parsedSubjectId;
     if (parsedAuthorId !== undefined) updatePayload.authorId = parsedAuthorId;
 
-    const updatedQuestion = await questionService.updateQuestionService(parsedId, updatePayload);
+    const updatedQuestion = await questionService.updateQuestionService(
+      parsedId,
+      updatePayload,
+    );
 
     return res.status(200).json({ success: true, data: updatedQuestion });
   } catch (error) {
     if (error.statusCode) {
-      return res.status(error.statusCode).json({ success: false, message: error.message });
+      return res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
     }
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+    return res
+      .status(500)
+      .json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
@@ -210,9 +251,9 @@ export const deleteQuestion = async (req, res) => {
       });
     }
 
-    const deletedQuestion = await questionService.deleteQuestionService(parsedId);
+    const deletedQuestion =
+      await questionService.deleteQuestionService(parsedId);
 
-    // Retorna a propriedade `data` contendo o registro excluído
     return res.status(200).json({
       success: true,
       data: deletedQuestion,
@@ -220,8 +261,12 @@ export const deleteQuestion = async (req, res) => {
     });
   } catch (error) {
     if (error.statusCode) {
-      return res.status(error.statusCode).json({ success: false, message: error.message });
+      return res
+        .status(error.statusCode)
+        .json({ success: false, message: error.message });
     }
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+    return res
+      .status(500)
+      .json({ success: false, message: 'Erro interno no servidor.' });
   }
 };

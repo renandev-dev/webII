@@ -35,7 +35,7 @@ export const getSubjectsService = async () => {
   });
 };
 
-export const getSubjectByIdService = async (id) => {
+export const getSubjectByIdService = async id => {
   const numericId = Number(id);
 
   return await prisma.subject.findUnique({
@@ -44,7 +44,10 @@ export const getSubjectByIdService = async (id) => {
   });
 };
 
-export const updateSubjectService = async (id, { nome, ativa, professorId }) => {
+export const updateSubjectService = async (
+  id,
+  { nome, ativa, professorId },
+) => {
   const numericId = Number(id);
 
   const subjectExists = await prisma.subject.findUnique({
@@ -82,7 +85,7 @@ export const updateSubjectService = async (id, { nome, ativa, professorId }) => 
   });
 };
 
-export const deleteSubjectService = async (id) => {
+export const deleteSubjectService = async id => {
   const numericId = Number(id);
 
   const subjectExists = await prisma.subject.findUnique({

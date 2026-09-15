@@ -8,7 +8,7 @@ const includeRelations = {
   },
 };
 
-export const createQuestionService = async (data) => {
+export const createQuestionService = async data => {
   const { enunciado, respostaCorreta, dificuldade, subjectId, authorId } = data;
 
   const [subject, author] = await Promise.all([
@@ -40,7 +40,7 @@ export const getQuestionsService = async () => {
   });
 };
 
-export const getQuestionByIdService = async (id) => {
+export const getQuestionByIdService = async id => {
   return await prisma.question.findUnique({
     where: { id: Number(id) },
     include: includeRelations,
@@ -50,7 +50,9 @@ export const getQuestionByIdService = async (id) => {
 export const updateQuestionService = async (id, data) => {
   const numericId = Number(id);
 
-  const existingQuestion = await prisma.question.findUnique({ where: { id: numericId } });
+  const existingQuestion = await prisma.question.findUnique({
+    where: { id: numericId },
+  });
   if (!existingQuestion) {
     const error = new Error('Questão não encontrada.');
     error.statusCode = 404;
@@ -58,7 +60,9 @@ export const updateQuestionService = async (id, data) => {
   }
 
   if (data.subjectId !== undefined) {
-    const subject = await prisma.subject.findUnique({ where: { id: Number(data.subjectId) } });
+    const subject = await prisma.subject.findUnique({
+      where: { id: Number(data.subjectId) },
+    });
     if (!subject) {
       const error = new Error('Matéria não encontrada.');
       error.statusCode = 404;
@@ -67,7 +71,9 @@ export const updateQuestionService = async (id, data) => {
   }
 
   if (data.authorId !== undefined) {
-    const author = await prisma.user.findUnique({ where: { id: Number(data.authorId) } });
+    const author = await prisma.user.findUnique({
+      where: { id: Number(data.authorId) },
+    });
     if (!author) {
       const error = new Error('Autor não encontrado.');
       error.statusCode = 404;
@@ -82,10 +88,12 @@ export const updateQuestionService = async (id, data) => {
   });
 };
 
-export const deleteQuestionService = async (id) => {
+export const deleteQuestionService = async id => {
   const numericId = Number(id);
 
-  const existingQuestion = await prisma.question.findUnique({ where: { id: numericId } });
+  const existingQuestion = await prisma.question.findUnique({
+    where: { id: numericId },
+  });
   if (!existingQuestion) {
     const error = new Error('Questão não encontrada.');
     error.statusCode = 404;

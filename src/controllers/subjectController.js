@@ -1,6 +1,6 @@
 import * as subjectService from '../services/subjectService.js';
 
-const isValidIntegerId = (id) => {
+const isValidIntegerId = id => {
   if (typeof id !== 'string') return false;
   return /^\d+$/.test(id.trim()) && Number(id) > 0;
 };
@@ -24,7 +24,11 @@ export const createSubject = async (req, res) => {
     }
 
     const parsedProfessorId = Number(professorId);
-    if (isNaN(parsedProfessorId) || !Number.isInteger(parsedProfessorId) || parsedProfessorId <= 0) {
+    if (
+      isNaN(parsedProfessorId) ||
+      !Number.isInteger(parsedProfessorId) ||
+      parsedProfessorId <= 0
+    ) {
       return res.status(400).json({
         success: false,
         message: 'O professorId deve ser um número inteiro positivo.',
@@ -45,7 +49,9 @@ export const createSubject = async (req, res) => {
         message: error.message,
       });
     }
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+    return res
+      .status(500)
+      .json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
@@ -57,8 +63,10 @@ export const getSubjects = async (req, res) => {
       data: subjects,
       total: subjects.length,
     });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+  } catch {
+    return res
+      .status(500)
+      .json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
@@ -76,12 +84,16 @@ export const getSubjectById = async (req, res) => {
     const subject = await subjectService.getSubjectByIdService(Number(id));
 
     if (!subject) {
-      return res.status(404).json({ success: false, message: 'Matéria não encontrada.' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Matéria não encontrada.' });
     }
 
     return res.status(200).json({ success: true, data: subject });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+  } catch {
+    return res
+      .status(500)
+      .json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
@@ -89,8 +101,12 @@ export const updateSubject = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Se o ID for inválido em formato OU se for a flag de ID inválido do Bruno
-    if (!isValidIntegerId(id) || id === 'invalid-id' || id === 'abc' || id === '0') {
+    if (
+      !isValidIntegerId(id) ||
+      id === 'invalid-id' ||
+      id === 'abc' ||
+      id === '0'
+    ) {
       return res.status(400).json({
         success: false,
         message: 'ID inválido.',
@@ -110,7 +126,10 @@ export const updateSubject = async (req, res) => {
       });
     }
 
-    if (nome !== undefined && (typeof nome !== 'string' || nome.trim() === '')) {
+    if (
+      nome !== undefined &&
+      (typeof nome !== 'string' || nome.trim() === '')
+    ) {
       return res.status(400).json({
         success: false,
         message: 'O nome, quando enviado, não pode ser vazio.',
@@ -127,7 +146,11 @@ export const updateSubject = async (req, res) => {
     let parsedProfessorId = professorId;
     if (professorId !== undefined) {
       parsedProfessorId = Number(professorId);
-      if (isNaN(parsedProfessorId) || !Number.isInteger(parsedProfessorId) || parsedProfessorId <= 0) {
+      if (
+        isNaN(parsedProfessorId) ||
+        !Number.isInteger(parsedProfessorId) ||
+        parsedProfessorId <= 0
+      ) {
         return res.status(400).json({
           success: false,
           message: 'O professorId deve ser um número inteiro positivo.',
@@ -135,11 +158,14 @@ export const updateSubject = async (req, res) => {
       }
     }
 
-    const updatedSubject = await subjectService.updateSubjectService(Number(id), {
-      nome: nome !== undefined ? nome.trim() : undefined,
-      ativa,
-      professorId: parsedProfessorId,
-    });
+    const updatedSubject = await subjectService.updateSubjectService(
+      Number(id),
+      {
+        nome: nome !== undefined ? nome.trim() : undefined,
+        ativa,
+        professorId: parsedProfessorId,
+      },
+    );
 
     return res.status(200).json({ success: true, data: updatedSubject });
   } catch (error) {
@@ -149,7 +175,9 @@ export const updateSubject = async (req, res) => {
         message: error.message,
       });
     }
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+    return res
+      .status(500)
+      .json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
@@ -157,14 +185,21 @@ export const deleteSubject = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!isValidIntegerId(id) || id === 'invalid-id' || id === 'abc' || id === '0') {
+    if (
+      !isValidIntegerId(id) ||
+      id === 'invalid-id' ||
+      id === 'abc' ||
+      id === '0'
+    ) {
       return res.status(400).json({
         success: false,
         message: 'O ID deve ser um número inteiro positivo.',
       });
     }
 
-    const deletedSubject = await subjectService.deleteSubjectService(Number(id));
+    const deletedSubject = await subjectService.deleteSubjectService(
+      Number(id),
+    );
 
     return res.status(200).json({
       success: true,
@@ -178,6 +213,8 @@ export const deleteSubject = async (req, res) => {
         message: error.message,
       });
     }
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+    return res
+      .status(500)
+      .json({ success: false, message: 'Erro interno no servidor.' });
   }
 };

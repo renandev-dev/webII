@@ -1,5 +1,3 @@
-import request from 'supertest';
-import app from '../src/app.js';
 import {
   describe,
   it,
@@ -7,9 +5,12 @@ import {
   beforeAll,
   beforeEach,
   afterAll,
+  afterEach,
 } from 'vitest';
-import prisma from '../src/config/database.js';
 
+import request from 'supertest';
+import app from '../src/app.js';
+import prisma from '../src/config/database.js';
 describe('Suíte de Testes para /subjects', () => {
   let teacherId;
   let subjectId;
@@ -21,7 +22,7 @@ describe('Suíte de Testes para /subjects', () => {
       data: {
         nome: 'Professor Teste',
         email: `prof_${Date.now()}@test.com`,
-        senha: 'password123',
+       
       },
     });
     teacherId = teacher.id;
@@ -137,13 +138,15 @@ describe('Suíte de Testes para /subjects', () => {
     });
 
     it('deve retornar 409 ao tentar excluir matéria com questões vinculadas', async () => {
-      // Vincula uma questão à matéria
-      await prisma.question.create({
-        data: {
-          enunciado: 'Qual a resposta?',
-          materiaId: subjectId,
-        },
-      });
+  // Vincula uma questão à matéria
+  await prisma.question.create({
+    data: {
+      enunciado: 'Qual a resposta?',
+      dificuldade: 1,
+      subjectId: subjectId,
+      authorId: teacherId,
+    },
+  });
 
       const response = await request(app).delete(`/subjects/${subjectId}`);
 
