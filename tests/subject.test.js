@@ -1,5 +1,13 @@
 import request from 'supertest';
 import app from '../src/app.js';
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  beforeEach,
+  afterAll,
+} from 'vitest';
 import prisma from '../src/config/database.js';
 
 describe('Suíte de Testes para /subjects', () => {
