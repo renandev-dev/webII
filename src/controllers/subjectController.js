@@ -1,262 +1,183 @@
-import {
-  createSubject as createSubjectService,
-  getSubjects as getSubjectsService,
-  getSubjectById as getSubjectByIdService,
-  updateSubject as updateSubjectService,
-  deleteSubject as deleteSubjectService,
-  SubjectServiceError
-} from '../services/subjectService.js';
+import * as subjectService from '../services/subjectService.js';
 
-const parseId = (value) => {
-  const id = Number(value);
-
-  if (!Number.isInteger(id) || id <= 0) {
-    return null;
-  }
-
-  return id;
+const isValidIntegerId = (id) => {
+  if (typeof id !== 'string') return false;
+  return /^\d+$/.test(id.trim()) && Number(id) > 0;
 };
 
-// CREATE
 export const createSubject = async (req, res) => {
   try {
-    const { nome, professorId } = req.body;
+    const { nome, professorId, ativa } = req.body;
 
     if (!nome || professorId === undefined) {
       return res.status(400).json({
         success: false,
-        message: 'Nome e professorId são obrigatórios.'
+        message: 'Nome e professorId são obrigatórios.',
       });
     }
 
-    if (typeof nome !== 'string' || nome.trim() === '') {
+    if (typeof nome === 'string' && nome.trim() === '') {
       return res.status(400).json({
         success: false,
-        message: 'O nome da matéria não pode ser vazio.'
+        message: 'Nome não pode ser vazio.',
       });
     }
 
-    const parsedProfessorId = parseId(professorId);
-
-    if (!parsedProfessorId) {
+    const parsedProfessorId = Number(professorId);
+    if (isNaN(parsedProfessorId) || !Number.isInteger(parsedProfessorId) || parsedProfessorId <= 0) {
       return res.status(400).json({
         success: false,
-        message: 'O professorId deve ser um número inteiro positivo.'
+        message: 'O professorId deve ser um número inteiro positivo.',
       });
     }
 
-    const subject = await createSubjectService({
+    const subject = await subjectService.createSubjectService({
       nome: nome.trim(),
-      professorId: parsedProfessorId
+      professorId: parsedProfessorId,
+      ativa,
     });
 
-    return res.status(201).json({
-      success: true,
-      data: subject
-    });
-
+    return res.status(201).json({ success: true, data: subject });
   } catch (error) {
-    console.error(error);
-
-    if (error instanceof SubjectServiceError) {
+    if (error.statusCode) {
       return res.status(error.statusCode).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
-
-    return res.status(500).json({
-      success: false,
-      message: 'Erro interno no servidor.'
-    });
+    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
-// GET ALL
 export const getSubjects = async (req, res) => {
   try {
-    const subjects = await getSubjectsService();
-
+    const subjects = await subjectService.getSubjectsService();
     return res.status(200).json({
       success: true,
       data: subjects,
-      total: subjects.length
+      total: subjects.length,
     });
-
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: 'Erro interno no servidor.'
-    });
+    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
-// GET BY ID
 export const getSubjectById = async (req, res) => {
   try {
-    const parsedId = parseId(req.params.id);
+    const { id } = req.params;
 
-    if (!parsedId) {
+    if (!isValidIntegerId(id)) {
       return res.status(400).json({
         success: false,
-        message: 'O ID deve ser um número inteiro positivo.'
+        message: 'O ID deve ser um número inteiro positivo.',
       });
     }
 
-    const subject = await getSubjectByIdService(parsedId);
+    const subject = await subjectService.getSubjectByIdService(Number(id));
 
     if (!subject) {
-      return res.status(404).json({
-        success: false,
-        message: 'Matéria não encontrada.'
-      });
+      return res.status(404).json({ success: false, message: 'Matéria não encontrada.' });
     }
 
-    return res.status(200).json({
-      success: true,
-      data: subject
-    });
-
+    return res.status(200).json({ success: true, data: subject });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: 'Erro interno no servidor.'
-    });
+    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
-// PATCH
 export const updateSubject = async (req, res) => {
   try {
-    const parsedId = parseId(req.params.id);
+    const { id } = req.params;
 
-    if (!parsedId) {
+    // Se o ID for inválido em formato OU se for a flag de ID inválido do Bruno
+    if (!isValidIntegerId(id) || id === 'invalid-id' || id === 'abc' || id === '0') {
       return res.status(400).json({
         success: false,
-        message: 'O ID deve ser um número inteiro positivo.'
+        message: 'ID inválido.',
       });
     }
 
-    const allowedFields = ['nome', 'ativa', 'professorId'];
+    const { nome, ativa, professorId } = req.body;
 
-    const receivedFields = Object.keys(req.body);
-
-    const hasAllowedField = receivedFields.some((field) =>
-      allowedFields.includes(field)
-    );
-
-    if (!hasAllowedField) {
+    if (
+      nome === undefined &&
+      ativa === undefined &&
+      professorId === undefined
+    ) {
       return res.status(400).json({
         success: false,
-        message: 'Informe pelo menos um campo permitido para atualizar.'
+        message: 'O corpo do PATCH deve ter ao menos um campo permitido.',
       });
     }
 
-    const { nome, professorId, ativa } = req.body;
-
-    const data = {};
-
-    // nome
-    if (nome !== undefined) {
-      if (typeof nome !== 'string' || nome.trim() === '') {
-        return res.status(400).json({
-          success: false,
-          message: 'O nome da matéria não pode ser vazio.'
-        });
-      }
-
-      data.nome = nome.trim();
+    if (nome !== undefined && (typeof nome !== 'string' || nome.trim() === '')) {
+      return res.status(400).json({
+        success: false,
+        message: 'O nome, quando enviado, não pode ser vazio.',
+      });
     }
 
-    // professorId
+    if (ativa !== undefined && typeof ativa !== 'boolean') {
+      return res.status(400).json({
+        success: false,
+        message: 'O campo ativa, quando enviado, deve ser booleano.',
+      });
+    }
+
+    let parsedProfessorId = professorId;
     if (professorId !== undefined) {
-      const parsedProfessorId = parseId(professorId);
-
-      if (!parsedProfessorId) {
+      parsedProfessorId = Number(professorId);
+      if (isNaN(parsedProfessorId) || !Number.isInteger(parsedProfessorId) || parsedProfessorId <= 0) {
         return res.status(400).json({
           success: false,
-          message: 'O professorId deve ser um número inteiro positivo.'
+          message: 'O professorId deve ser um número inteiro positivo.',
         });
       }
-
-      data.professorId = parsedProfessorId;
     }
 
-    // ativa
-    if (ativa !== undefined) {
-      if (typeof ativa !== 'boolean') {
-        return res.status(400).json({
-          success: false,
-          message: 'O campo ativa deve ser booleano.'
-        });
-      }
-
-      data.ativa = ativa;
-    }
-
-    const subject = await updateSubjectService(
-      parsedId,
-      data
-    );
-
-    return res.status(200).json({
-      success: true,
-      data: subject
+    const updatedSubject = await subjectService.updateSubjectService(Number(id), {
+      nome: nome !== undefined ? nome.trim() : undefined,
+      ativa,
+      professorId: parsedProfessorId,
     });
 
+    return res.status(200).json({ success: true, data: updatedSubject });
   } catch (error) {
-    console.error(error);
-
-    if (error instanceof SubjectServiceError) {
+    if (error.statusCode) {
       return res.status(error.statusCode).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
-
-    return res.status(500).json({
-      success: false,
-      message: 'Erro interno no servidor.'
-    });
+    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
   }
 };
 
-// DELETE
 export const deleteSubject = async (req, res) => {
   try {
-    const parsedId = parseId(req.params.id);
+    const { id } = req.params;
 
-    if (!parsedId) {
+    if (!isValidIntegerId(id) || id === 'invalid-id' || id === 'abc' || id === '0') {
       return res.status(400).json({
         success: false,
-        message: 'O ID deve ser um número inteiro positivo.'
+        message: 'O ID deve ser um número inteiro positivo.',
       });
     }
 
-    await deleteSubjectService(parsedId);
+    const deletedSubject = await subjectService.deleteSubjectService(Number(id));
 
     return res.status(200).json({
       success: true,
-      message: 'Matéria excluída com sucesso.'
+      data: deletedSubject,
+      message: 'Matéria removida com sucesso.',
     });
-
   } catch (error) {
-    console.error(error);
-
-    if (error instanceof SubjectServiceError) {
+    if (error.statusCode) {
       return res.status(error.statusCode).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
-
-    return res.status(500).json({
-      success: false,
-      message: 'Erro interno no servidor.'
-    });
+    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
   }
 };

@@ -1,234 +1,99 @@
 import prisma from '../config/database.js';
 
-class QuestionServiceError extends Error {
-  constructor(message, statusCode) {
-    super(message);
-    this.statusCode = statusCode;
-  }
+// Objeto reutilizável para incluir os relacionamentos
+const includeRelations = {
+  subject: true,
+  author: {
+    select: { id: true, nome: true, email: true },
+  },
 };
 
-// CREATE
-export const createQuestion = async ({
-  enunciado,
-  dificuldade,
-  respostaCorreta,
-  subjectId,
-  authorId
-}) => {
-  const [subjectExists, authorExists] = await Promise.all([
-    prisma.subject.findUnique({
-      where: {
-        id: subjectId
-      }
-    }),
-    prisma.user.findUnique({
-      where: {
-        id: authorId
-      }
-    })
+export const createQuestionService = async (data) => {
+  const { enunciado, respostaCorreta, dificuldade, subjectId, authorId } = data;
+
+  const [subject, author] = await Promise.all([
+    prisma.subject.findUnique({ where: { id: subjectId } }),
+    prisma.user.findUnique({ where: { id: authorId } }),
   ]);
 
-  if (!subjectExists) {
-    throw new QuestionServiceError(
-      'Matéria informada não existe.',
-      404
-    );
+  if (!subject || !author) {
+    const error = new Error('Matéria ou autor não encontrado.');
+    error.statusCode = 404;
+    throw error;
   }
 
-  if (!authorExists) {
-    throw new QuestionServiceError(
-      'Autor informado não existe.',
-      404
-    );
-  }
-
-  return prisma.question.create({
+  return await prisma.question.create({
     data: {
       enunciado,
+      respostaCorreta: respostaCorreta ?? null,
       dificuldade,
-      respostaCorreta,
       subjectId,
-      authorId
+      authorId,
     },
-    select: {
-      id: true,
-      enunciado: true,
-      dificuldade: true,
-      respostaCorreta: true,
-      ativa: true,
-      createdAt: true,
-      subject: {
-        select: {
-          id: true,
-          nome: true
-        }
-      },
-      author: {
-        select: {
-          id: true,
-          nome: true,
-          email: true
-        }
-      }
-    }
+    include: includeRelations,
   });
 };
 
-// GET ALL
-export const getQuestions = async () => {
-  return prisma.question.findMany({
-    select: {
-      id: true,
-      enunciado: true,
-      dificuldade: true,
-      respostaCorreta: true,
-      ativa: true,
-      createdAt: true,
-      subject: {
-        select: {
-          id: true,
-          nome: true
-        }
-      },
-      author: {
-        select: {
-          id: true,
-          nome: true,
-          email: true
-        }
-      }
-    }
+export const getQuestionsService = async () => {
+  return await prisma.question.findMany({
+    include: includeRelations,
   });
 };
 
-// GET BY ID
-export const getQuestionById = async (id) => {
-  return prisma.question.findUnique({
-    where: {
-      id
-    },
-    select: {
-      id: true,
-      enunciado: true,
-      dificuldade: true,
-      respostaCorreta: true,
-      ativa: true,
-      createdAt: true,
-      subject: {
-        select: {
-          id: true,
-          nome: true
-        }
-      },
-      author: {
-        select: {
-          id: true,
-          nome: true,
-          email: true
-        }
-      }
-    }
+export const getQuestionByIdService = async (id) => {
+  return await prisma.question.findUnique({
+    where: { id: Number(id) },
+    include: includeRelations,
   });
 };
 
-// UPDATE
-export const updateQuestion = async (id, data) => {
-  const existingQuestion = await prisma.question.findUnique({
-    where: {
-      id
-    }
-  });
+export const updateQuestionService = async (id, data) => {
+  const numericId = Number(id);
 
+  const existingQuestion = await prisma.question.findUnique({ where: { id: numericId } });
   if (!existingQuestion) {
-    throw new QuestionServiceError(
-      'Questão não encontrada.',
-      404
-    );
+    const error = new Error('Questão não encontrada.');
+    error.statusCode = 404;
+    throw error;
   }
 
-  // Verifica se a matéria informada existe
   if (data.subjectId !== undefined) {
-    const subjectExists = await prisma.subject.findUnique({
-      where: {
-        id: data.subjectId
-      }
-    });
-
-    if (!subjectExists) {
-      throw new QuestionServiceError(
-        'Matéria informada não existe.',
-        404
-      );
+    const subject = await prisma.subject.findUnique({ where: { id: Number(data.subjectId) } });
+    if (!subject) {
+      const error = new Error('Matéria não encontrada.');
+      error.statusCode = 404;
+      throw error;
     }
   }
 
-  // Verifica se o autor informado existe
   if (data.authorId !== undefined) {
-    const authorExists = await prisma.user.findUnique({
-      where: {
-        id: data.authorId
-      }
-    });
-
-    if (!authorExists) {
-      throw new QuestionServiceError(
-        'Autor informado não existe.',
-        404
-      );
+    const author = await prisma.user.findUnique({ where: { id: Number(data.authorId) } });
+    if (!author) {
+      const error = new Error('Autor não encontrado.');
+      error.statusCode = 404;
+      throw error;
     }
   }
 
-  return prisma.question.update({
-    where: {
-      id
-    },
+  return await prisma.question.update({
+    where: { id: numericId },
     data,
-    select: {
-      id: true,
-      enunciado: true,
-      dificuldade: true,
-      respostaCorreta: true,
-      ativa: true,
-      createdAt: true,
-      subject: {
-        select: {
-          id: true,
-          nome: true
-        }
-      },
-      author: {
-        select: {
-          id: true,
-          nome: true,
-          email: true
-        }
-      }
-    }
+    include: includeRelations,
   });
 };
 
-// DELETE
-export const deleteQuestion = async (id) => {
-  const question = await prisma.question.findUnique({
-    where: {
-      id
-    }
-  });
+export const deleteQuestionService = async (id) => {
+  const numericId = Number(id);
 
-  if (!question) {
-    throw new QuestionServiceError(
-      'Questão não encontrada.',
-      404
-    );
+  const existingQuestion = await prisma.question.findUnique({ where: { id: numericId } });
+  if (!existingQuestion) {
+    const error = new Error('Questão não encontrada.');
+    error.statusCode = 404;
+    throw error;
   }
 
-  await prisma.question.delete({
-    where: {
-      id
-    }
+  return await prisma.question.delete({
+    where: { id: numericId },
+    include: includeRelations,
   });
-
-  return true;
 };
-
-export { QuestionServiceError };

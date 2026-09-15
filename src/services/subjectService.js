@@ -1,176 +1,109 @@
 import prisma from '../config/database.js';
 
-class SubjectServiceError extends Error {
-  constructor(message, statusCode) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-}
+const includeProfessor = {
+  professor: {
+    select: { id: true, nome: true, email: true },
+  },
+};
 
-// CREATE
-export const createSubject = async ({ nome, professorId }) => {
+export const createSubjectService = async ({ nome, professorId, ativa }) => {
+  const numericProfessorId = Number(professorId);
+
   const professorExists = await prisma.user.findUnique({
-    where: {
-      id: professorId
-    }
+    where: { id: numericProfessorId },
   });
 
   if (!professorExists) {
-    throw new SubjectServiceError(
-      'Professor informado não existe.',
-      404
-    );
+    const error = new Error('Professor informado não existe.');
+    error.statusCode = 404;
+    throw error;
   }
 
-  return prisma.subject.create({
+  return await prisma.subject.create({
     data: {
       nome,
-      professorId
+      professorId: numericProfessorId,
+      ativa: ativa ?? true,
     },
-    select: {
-      id: true,
-      nome: true,
-      ativa: true,
-      createdAt: true,
-      professor: {
-        select: {
-          id: true,
-          nome: true,
-          email: true
-        }
-      }
-    }
+    include: includeProfessor,
   });
 };
 
-// GET ALL
-export const getSubjects = async () => {
-  return prisma.subject.findMany({
-    select: {
-      id: true,
-      nome: true,
-      ativa: true,
-      createdAt: true,
-      professor: {
-        select: {
-          id: true,
-          nome: true,
-          email: true
-        }
-      }
-    }
+export const getSubjectsService = async () => {
+  return await prisma.subject.findMany({
+    include: includeProfessor,
   });
 };
 
-// GET BY ID
-export const getSubjectById = async (id) => {
-  return prisma.subject.findUnique({
-    where: {
-      id
-    },
-    select: {
-      id: true,
-      nome: true,
-      ativa: true,
-      createdAt: true,
-      professor: {
-        select: {
-          id: true,
-          nome: true,
-          email: true
-        }
-      }
-    }
+export const getSubjectByIdService = async (id) => {
+  const numericId = Number(id);
+
+  return await prisma.subject.findUnique({
+    where: { id: numericId },
+    include: includeProfessor,
   });
 };
 
-// UPDATE
-export const updateSubject = async (id, data) => {
-  const existingSubject = await prisma.subject.findUnique({
-    where: {
-      id
-    }
+export const updateSubjectService = async (id, { nome, ativa, professorId }) => {
+  const numericId = Number(id);
+
+  const subjectExists = await prisma.subject.findUnique({
+    where: { id: numericId },
   });
 
-  if (!existingSubject) {
-    throw new SubjectServiceError(
-      'Matéria não encontrada.',
-      404
-    );
+  if (!subjectExists) {
+    const error = new Error('Matéria não encontrada.');
+    error.statusCode = 404;
+    throw error;
   }
 
-  if (data.professorId !== undefined) {
+  if (professorId !== undefined) {
+    const numericProfessorId = Number(professorId);
     const professorExists = await prisma.user.findUnique({
-      where: {
-        id: data.professorId
-      }
+      where: { id: numericProfessorId },
     });
 
     if (!professorExists) {
-      throw new SubjectServiceError(
-        'Professor informado não existe.',
-        404
-      );
+      const error = new Error('Professor informado não existe.');
+      error.statusCode = 404;
+      throw error;
     }
   }
 
-  return prisma.subject.update({
-    where: {
-      id
-    },
-    data,
-    select: {
-      id: true,
-      nome: true,
-      ativa: true,
-      createdAt: true,
-      professor: {
-        select: {
-          id: true,
-          nome: true,
-          email: true
-        }
-      }
-    }
+  const updateData = {};
+  if (nome !== undefined) updateData.nome = nome;
+  if (ativa !== undefined) updateData.ativa = ativa;
+  if (professorId !== undefined) updateData.professorId = Number(professorId);
+
+  return await prisma.subject.update({
+    where: { id: numericId },
+    data: updateData,
+    include: includeProfessor,
   });
 };
 
-// DELETE
-export const deleteSubject = async (id) => {
-  const subject = await prisma.subject.findUnique({
-    where: {
-      id
-    }
+export const deleteSubjectService = async (id) => {
+  const numericId = Number(id);
+
+  const subjectExists = await prisma.subject.findUnique({
+    where: { id: numericId },
+    include: { questions: true },
   });
 
-  if (!subject) {
-    throw new SubjectServiceError(
-      'Matéria não encontrada.',
-      404
-    );
+  if (!subjectExists) {
+    const error = new Error('Matéria não encontrada.');
+    error.statusCode = 404;
+    throw error;
   }
 
-  // Verifica se existem questões vinculadas.
-  const questionsCount = await prisma.question.count({
-    where: {
-      subjectId: id
-    }
-  });
-
-  if (questionsCount > 0) {
-    throw new SubjectServiceError(
-      'Não é possível excluir uma matéria que possui questões vinculadas.',
-      409
-    );
+  if (subjectExists.questions && subjectExists.questions.length > 0) {
+    const error = new Error('Matéria possui questões vinculadas.');
+    error.statusCode = 409;
+    throw error;
   }
 
-  await prisma.subject.delete({
-    where: {
-      id
-    }
+  return await prisma.subject.delete({
+    where: { id: numericId },
+    include: includeProfessor,
   });
-
-  return true;
 };
-
-export { SubjectServiceError };
