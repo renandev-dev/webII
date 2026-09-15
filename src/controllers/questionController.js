@@ -1,165 +1,354 @@
-import prisma from '../config/database.js';
+import {
+  createQuestion as createQuestionService,
+  getQuestions as getQuestionsService,
+  getQuestionById as getQuestionByIdService,
+  updateQuestion as updateQuestionService,
+  deleteQuestion as deleteQuestionService,
+  QuestionServiceError
+} from '../services/questionService.js';
 
+const parseId = (value) => {
+  const id = Number(value);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return null;
+  }
+
+  return id;
+};
+
+// CREATE
 export const createQuestion = async (req, res) => {
   try {
-    const { enunciado, dificuldade, respostaCorreta, subjectId, authorId } = req.body;
+    const {
+      enunciado,
+      dificuldade,
+      respostaCorreta,
+      subjectId,
+      authorId
+    } = req.body;
 
-    // 1. Validação de campos obrigatórios
-    if (!enunciado || dificuldade === undefined || subjectId === undefined || authorId === undefined) {
-      return res.status(400).json({ success: false, message: 'Enunciado, dificuldade, subjectId e authorId são obrigatórios.' });
+    if (
+      enunciado === undefined ||
+      dificuldade === undefined ||
+      subjectId === undefined ||
+      authorId === undefined
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'Enunciado, dificuldade, subjectId e authorId são obrigatórios.'
+      });
     }
 
-    // 2. Validação de IDs e valores inteiros
-    const parsedSubjectId = Number(subjectId);
-    const parsedAuthorId = Number(authorId);
+    if (
+      typeof enunciado !== 'string' ||
+      enunciado.trim() === ''
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'O enunciado não pode ser vazio.'
+      });
+    }
+
+    const parsedSubjectId = parseId(subjectId);
+    const parsedAuthorId = parseId(authorId);
     const parsedDificuldade = Number(dificuldade);
 
-    if (!Number.isInteger(parsedSubjectId) || parsedSubjectId <= 0) {
-      return res.status(400).json({ success: false, message: 'O subjectId deve ser um número inteiro positivo.' });
+    if (!parsedSubjectId) {
+      return res.status(400).json({
+        success: false,
+        message: 'O subjectId deve ser um número inteiro positivo.'
+      });
     }
 
-    if (!Number.isInteger(parsedAuthorId) || parsedAuthorId <= 0) {
-      return res.status(400).json({ success: false, message: 'O authorId deve ser um número inteiro positivo.' });
+    if (!parsedAuthorId) {
+      return res.status(400).json({
+        success: false,
+        message: 'O authorId deve ser um número inteiro positivo.'
+      });
     }
 
-    if (![1, 2, 3].includes(parsedDificuldade)) {
-      return res.status(400).json({ success: false, message: 'A dificuldade deve ser 1 (Fácil), 2 (Média) ou 3 (Difícil).' });
+    if (
+      !Number.isInteger(parsedDificuldade) ||
+      ![1, 2, 3].includes(parsedDificuldade)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'A dificuldade deve ser 1 (Fácil), 2 (Média) ou 3 (Difícil).'
+      });
     }
 
-    // 3. Confirmar que a matéria e o autor existem antes de criar
-    const [subjectExists, authorExists] = await Promise.all([
-      prisma.subject.findUnique({ where: { id: parsedSubjectId } }),
-      prisma.user.findUnique({ where: { id: parsedAuthorId } })
-    ]);
-
-    if (!subjectExists) {
-      return res.status(404).json({ success: false, message: 'Matéria informada não existe.' });
-    }
-
-    if (!authorExists) {
-      return res.status(404).json({ success: false, message: 'Autor informado não existe.' });
-    }
-
-    // Criação da questão
-    const question = await prisma.question.create({
-      data: {
-        enunciado,
-        dificuldade: parsedDificuldade,
-        respostaCorreta,
-        subjectId: parsedSubjectId,
-        authorId: parsedAuthorId
-      },
-      select: {
-        id: true,
-        enunciado: true,
-        dificuldade: true,
-        respostaCorreta: true,
-        ativa: true,
-        createdAt: true,
-        subject: {
-          select: {
-            id: true,
-            nome: true
-          }
-        },
-        author: {
-          select: {
-            id: true,
-            nome: true,
-            email: true
-          }
-        }
-      }
+    const question = await createQuestionService({
+      enunciado: enunciado.trim(),
+      dificuldade: parsedDificuldade,
+      respostaCorreta:
+        respostaCorreta === undefined
+          ? null
+          : respostaCorreta,
+      subjectId: parsedSubjectId,
+      authorId: parsedAuthorId
     });
 
     return res.status(201).json({
       success: true,
       data: question
     });
+
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+    console.error(error);
+
+    if (error instanceof QuestionServiceError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Erro interno no servidor.'
+    });
   }
 };
 
+// GET ALL
 export const getQuestions = async (req, res) => {
   try {
-    const questions = await prisma.question.findMany({
-      select: {
-        id: true,
-        enunciado: true,
-        dificuldade: true,
-        respostaCorreta: true,
-        ativa: true,
-        createdAt: true,
-        subject: {
-          select: {
-            id: true,
-            nome: true
-          }
-        },
-        author: {
-          select: {
-            id: true,
-            nome: true,
-            email: true
-          }
-        }
-      }
-    });
+    const questions = await getQuestionsService();
 
     return res.status(200).json({
       success: true,
       data: questions,
       total: questions.length
     });
+
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Erro interno no servidor.'
+    });
   }
 };
 
+// GET BY ID
 export const getQuestionById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const parsedId = Number(id);
+    const parsedId = parseId(req.params.id);
 
-    if (!Number.isInteger(parsedId) || parsedId <= 0) {
-      return res.status(400).json({ success: false, message: 'O ID deve ser um número inteiro positivo.' });
+    if (!parsedId) {
+      return res.status(400).json({
+        success: false,
+        message: 'O ID deve ser um número inteiro positivo.'
+      });
     }
 
-    const question = await prisma.question.findUnique({
-      where: { id: parsedId },
-      select: {
-        id: true,
-        enunciado: true,
-        dificuldade: true,
-        respostaCorreta: true,
-        ativa: true,
-        createdAt: true,
-        subject: {
-          select: {
-            id: true,
-            nome: true
-          }
-        },
-        author: {
-          select: {
-            id: true,
-            nome: true,
-            email: true
-          }
-        }
-      }
-    });
+    const question = await getQuestionByIdService(parsedId);
 
     if (!question) {
-      return res.status(404).json({ success: false, message: 'Questão não encontrada.' });
+      return res.status(404).json({
+        success: false,
+        message: 'Questão não encontrada.'
+      });
     }
 
     return res.status(200).json({
       success: true,
       data: question
     });
+
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erro interno no servidor.' });
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Erro interno no servidor.'
+    });
+  }
+};
+
+// PATCH
+export const updateQuestion = async (req, res) => {
+  try {
+    const parsedId = parseId(req.params.id);
+
+    if (!parsedId) {
+      return res.status(400).json({
+        success: false,
+        message: 'O ID deve ser um número inteiro positivo.'
+      });
+    }
+
+    const allowedFields = [
+      'enunciado',
+      'dificuldade',
+      'respostaCorreta',
+      'subjectId',
+      'authorId',
+      'ativa'
+    ];
+
+    const receivedFields = Object.keys(req.body);
+
+    const hasAllowedField = receivedFields.some((field) =>
+      allowedFields.includes(field)
+    );
+
+    if (!hasAllowedField) {
+      return res.status(400).json({
+        success: false,
+        message: 'Informe pelo menos um campo permitido para atualizar.'
+      });
+    }
+
+    const {
+      enunciado,
+      dificuldade,
+      respostaCorreta,
+      subjectId,
+      authorId,
+      ativa
+    } = req.body;
+
+    const data = {};
+
+    // ENUNCIADO
+    if (enunciado !== undefined) {
+      if (
+        typeof enunciado !== 'string' ||
+        enunciado.trim() === ''
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: 'O enunciado não pode ser vazio.'
+        });
+      }
+
+      data.enunciado = enunciado.trim();
+    }
+
+    // DIFICULDADE
+    if (dificuldade !== undefined) {
+      const parsedDificuldade = Number(dificuldade);
+
+      if (
+        !Number.isInteger(parsedDificuldade) ||
+        ![1, 2, 3].includes(parsedDificuldade)
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: 'A dificuldade deve ser 1 (Fácil), 2 (Média) ou 3 (Difícil).'
+        });
+      }
+
+      data.dificuldade = parsedDificuldade;
+    }
+
+    // RESPOSTA CORRETA
+    if (respostaCorreta !== undefined) {
+      data.respostaCorreta = respostaCorreta;
+    }
+
+    // ATIVA
+    if (ativa !== undefined) {
+      if (typeof ativa !== 'boolean') {
+        return res.status(400).json({
+          success: false,
+          message: 'O campo ativa deve ser booleano.'
+        });
+      }
+
+      data.ativa = ativa;
+    }
+
+    // SUBJECT ID
+    if (subjectId !== undefined) {
+      const parsedSubjectId = parseId(subjectId);
+
+      if (!parsedSubjectId) {
+        return res.status(400).json({
+          success: false,
+          message: 'O subjectId deve ser um número inteiro positivo.'
+        });
+      }
+
+      data.subjectId = parsedSubjectId;
+    }
+
+    // AUTHOR ID
+    if (authorId !== undefined) {
+      const parsedAuthorId = parseId(authorId);
+
+      if (!parsedAuthorId) {
+        return res.status(400).json({
+          success: false,
+          message: 'O authorId deve ser um número inteiro positivo.'
+        });
+      }
+
+      data.authorId = parsedAuthorId;
+    }
+
+    const question = await updateQuestionService(
+      parsedId,
+      data
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: question
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    if (error instanceof QuestionServiceError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Erro interno no servidor.'
+    });
+  }
+};
+
+// DELETE
+export const deleteQuestion = async (req, res) => {
+  try {
+    const parsedId = parseId(req.params.id);
+
+    if (!parsedId) {
+      return res.status(400).json({
+        success: false,
+        message: 'O ID deve ser um número inteiro positivo.'
+      });
+    }
+
+    await deleteQuestionService(parsedId);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Questão excluída com sucesso.'
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    if (error instanceof QuestionServiceError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Erro interno no servidor.'
+    });
   }
 };
